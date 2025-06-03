@@ -1,0 +1,56 @@
+This Boiler Plate Brings a ready to connect React Web Client to a Express Server, ready to be deployed in an Google App Engine Environment using Google Cloud Build as CI/CD Platform
+
+----------
+Google Cloud Build - CI/CD
+The cloudBuild.yaml files in this folder are the CI/CD commands that trigger the build and deployment of each webClient and expressServer as separated services in Google App Engine using Google Build as CI/CD Pipeline.
+
+The Google Build expects a trigger event coming from a new version from the GitHub repository. Make sure to configure the Cloud Build to work separately for each service so the no unnecessary builds are made when no changes are captured in any of the services.
+
+While creating the new pipeline, create a new service Account to manage it and give the following roles:
+Cloud Build Service Account
+App Engine Admin (test without it)
+App Engine Deployer 
+App Engine Service Admin (test without it)
+Compute Viewer (what is it for?)
+Logging Admin (essential to log)
+Secret Manager Secret Accessor (need this to use the GitHub oauth token) 
+Serverless VPC Access User (what is it for?)
+Service Account User (essential role)
+Storage Admin (needs it to store the builds and the containers? really needed?)
+
+
+--------
+dispatch.yaml file
+The dispatch.yaml file shows where the deployments should point out. After the first deployment, copy the urls given by app engine to both services and include them in the 'url' fields in the dispatch.yaml file (respect the format "url/*" unless more granular control is needed according to your project).
+After updating the dispatch file, manually run it in your Google Platform CLI - "gcloud app deploy dispatch.yaml" (just navigate to the folder where the dispatch file is using Google Platform CLI and run this command)
+
+------
+Google App Engine
+In each folder for the services (webClient and expressServer) there is an app.yaml file with the description for how the service operates on App Engine. The default configuration comes with the environment as 'standard'. If the application needs to use webSocket , a 'flex' environment is necessary.
+
+The service account needs to be created in the GCP project which is holding this service and given 'App Engine Admin' role.
+App Engine Admin
+Editor
+Secret Manager Secret Accessor (necesary to access env files in the secret manager and load in the services)
+
+Both services can use the same service account - update them at the app.yaml.
+Also update the services urls after the first build in the app.yaml for the expressServer as it needs it as variables.
+
+
+---------------------------------------
+webClient
+
+the webclient is wrapped by webpack when built. The webpack loads fake ssl certificates in development mode to develop using https domains. This proved to be safer in translating to later production environment with less headaches.
+- change the standardIcon.ico and keep the same name in the webClient folder.
+- change the name of the page in index.html in the webClient folder.
+- in development mode, it runs in the port 8040. If needs to change, change in the webpack.config.js.
+- babel is being use for transpiling
+- change the webServer url for the actual domain in the webpacl and for localserver https://localhost:3030, change if needed.
+- if webSocket is necessary, simply uncomment the socket related lines in index.js in the clientRoot folder
+
+----------
+expressServer
+fill the .env files
+get new keys in the keys folders
+correct the name of the project in the secret_manager.js file
+the server it's also prepared to spin an ngrok instance automatically. just use the credentials at .env or remove it from server.js

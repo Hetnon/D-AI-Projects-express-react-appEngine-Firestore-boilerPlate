@@ -1,0 +1,67 @@
+/* global.css */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700&display=swap');
+
+
+
+
+@font-face {
+  font-family: 'Antona';
+  src: url('./Assets/Fonts/antona-regular.otf') format('truetype'); 
+  font-weight: normal;
+  font-style: normal;
+}
+:root { /* Define your color variables here */
+
+    --letter-light: rgb(250, 250, 250);
+    --letter-medium: rgb(103, 118, 128);
+    --letter-dark: rgb(17, 27, 33);
+    --letter-selected-button: rgb(0, 128, 105);
+
+    --border-light: var(--letter-light);
+    --border-dark: var(--letter-dark);
+    --border-medium: rgb(103, 118, 128);
+    --whatsapp-green: rgb(37, 211, 102);
+    --icons: var(--border-medium); 
+    --icons-hovered: rgb(233, 237, 239); 
+
+    --background-selected-button: rgb(231, 252, 227);
+    --background-hovered-button: rgb(233, 237, 239);
+    --background-light: var(--letter-light);
+    --background-regular:rgb(240, 242, 245);
+    --background-dark: RGB(167, 171, 183);
+    --background-whatsapp-conversation: rgb(239, 234, 226);
+    --background-bot-message: rgb(217, 253, 211);
+
+    --background-hovered: rgb(245, 246, 246);
+
+    --scrollbar-hover: rgb(175, 175, 175);
+    --scrollbar-regular: rgb(193, 193, 193);
+    --scrollbar-onClick: rgb(184, 184, 184);
+
+    --background-non-editable: var(--background-regular);
+
+    --user-message: rgb(255, 255, 255);
+
+    --dropbox-options-background: rgb(237, 237, 237);
+
+    --quotemaster-font-family:"Roboto", "Segoe UI", "Ubuntu", "Cantarell", "Fira Sans", sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--quotemaster-font-family);
+}
+
+.picker-dialog-bg {
+    opacity: 0 !important; /* Make the overlay fully transparent */
+    background: transparent !important; /* Make the background transparent */
+}

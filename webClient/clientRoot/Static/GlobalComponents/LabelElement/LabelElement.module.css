@@ -1,0 +1,13 @@
+.labels{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    font-size: 15px;
+    line-height: 15px;
+    padding: 0px 8px;
+    margin: 0px;
+    height: 32px;
+    border-bottom: 1px solid var(--border-dark);
+    background-color: var(--background-dark);
+}

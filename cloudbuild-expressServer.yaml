@@ -1,0 +1,34 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+steps:
+  # Back-end steps
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args: ['-c', 'ls -R /workspace']
+    id: 'List workspace contents'
+  #Step 4: Install dependencies for the server
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['install']
+    dir: 'expressServer'
+    id: 'Install expressServer dependencies'
+
+  #Step 5: Build the server
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['run', 'build-server']
+    dir: 'expressServer'
+    id: 'Build expressServer'
+    waitFor: ['Install expressServer dependencies']
+
+  #Step 6: Deploy the server
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy', 'app.yaml']
+    dir: 'expressServer'
+    id: 'Deploy expressServer'
+    waitFor: ['Build expressServer']
+
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+runtime: nodejs
+env: standard
+runtime_config:
+    operating_system: "ubuntu22"
+    runtime_version: "20"
+service: webClient
+manual_scaling:
+  instances: 1
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+service_account: 'XXX' #service account on your GCP Project that will hold role as App Engine Admin
+entrypoint: npm start
+handlers:
+  - url: /(.*\.(json|ico|js|css|html|png|jpg|jpeg|gif|svg))$
+    static_files: dist/\1
+    upload: dist/.*\.(json|ico|js|css|html|png|jpg|jpeg|gif|svg)$
+    secure: always
+  - url: /.*
+    secure: always
+    static_files: dist/index.html
+    upload: dist/index.html

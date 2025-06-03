@@ -1,0 +1,13 @@
+.linkBox{
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px 8px;
+    border: none;
+    font-size: 14px;
+    align-items: center;
+} 

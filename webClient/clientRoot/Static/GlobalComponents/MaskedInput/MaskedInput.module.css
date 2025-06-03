@@ -1,0 +1,13 @@
+.maskedInput {
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px 8px;
+    border: none;
+    font-size: 15px;
+    line-height: 15px;
+    background-color: transparent;
+    font-family: var(--quotemaster-font-family);
+}
+

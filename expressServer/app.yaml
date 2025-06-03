@@ -1,0 +1,31 @@
+runtime: nodejs
+env: standard
+runtime_config:
+    operating_system: "ubuntu22"
+    runtime_version: "20"
+service: api  # this yaml is for the the back end
+manual_scaling:
+  instances: 1
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+network:
+  session_affinity: true
+service_account: 'XXX' #service account on your GCP Project that will hold role as App Engine Admin
+liveness_check:
+  path: "/liveness_check"
+  check_interval_sec: 60  # Increase from default 30
+readiness_check:
+  path: "/readiness_check"
+  check_interval_sec: 10  # Increase from default 5
+  timeout_sec: 4  # How long each check waits
+  app_start_timeout_sec: 1800  # Increase this if your app needs more time to start
+env_variables:
+  NODE_ENV: 'production'
+  SERVER_ADDRESS: expressServerAddress(URL) # example https://api.my_service.com.br
+  ALLOWED_ORIGIN: webClientAddress(URL) #example "https://my_service.com.br"
+handlers:
+  - url: /api/.*
+    script: auto
+    secure: always

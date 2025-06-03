@@ -1,0 +1,33 @@
+.confirmSODeletionPopup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: 16px;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-style: solid;
+    border-color: var(--letter-dark);
+    border-width: 2px;
+    outline: none; /* Removes the default focus outline */
+    background-color: var(--background-light);
+    width: auto;
+}
+
+.confirmationModalTitle{
+    font-size: 16px;
+    font-weight: 100;
+    color: var(--border-dark);
+    line-height: 16px;
+    white-space: pre-line; /* This will respect the \n characters */
+}
+
+.confirmationButtons{
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    flex-direction: row; 
+    margin-top: 16px;
+}

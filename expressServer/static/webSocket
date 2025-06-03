@@ -1,0 +1,55 @@
+            import { Server } from "socket.io";
+        // copy and past the code below to  the server.js file exactly after the line startServer();
+
+
+        io = new Server(server, {
+            cors: {
+                origin: function (origin, callback) {
+                    if (!origin || origin===process.env.ALLOWED_ORIGIN) {
+                      callback(null, true)
+                    } else {
+                        callback(new Error('Not allowed by CORS'))
+                    }
+                },
+                methods: ['GET', 'POST'],
+                credentials: true
+            }
+        });
+
+        io.use((socket, next) => {
+            createSessionMiddleware(socket.request, {}, next);
+        });
+
+        io.use((socket, next) => {
+            const session = socket.request.session;
+            if(!session) {
+                console.log('No session found in socket');
+                next(new Error("No session found in socket"));  // Prevent the WebSocket connection
+            }
+            if(session.user) {
+                next();
+            } else {
+                console.log('Unauthenticated access attempt, disconnecting socket');
+                next(new Error("Unauthenticated access attempt, disconnecting socket"));  // Prevent the WebSocket connection
+            }
+        });
+
+        io.on('connection', (socket) => {
+            console.log('connected on socket:', socket.request.session.user?.userEmail);
+            socket.request.session.socketId = socket.id;
+            socket.request.session.save(err => {
+                if (err) {
+                    console.error('Session save error:', err);
+                }
+            });
+            socket.sessionId = socket.request.sessionID;
+            socket.userEmail = socket.request.session.user?.userEmail;
+            socket.serviceOrderId = socket.request.session.currentServiceOrder?.serviceOrderId;
+            socket.on('disconnect', () => {
+                //do something if needed
+            });
+            socket.on('joinRoom', ({ room }) => {
+                socket.join(room);
+                console.log(`Socket ${socket.id} joined room for ${room}`);
+            });
+        }); 

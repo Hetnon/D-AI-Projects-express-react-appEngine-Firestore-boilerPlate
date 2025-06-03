@@ -1,0 +1,18 @@
+.dateElement{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: transparent;
+    font-family: var(--quotemaster-font-family);
+    padding: 0px 8px;
+    font-size: 15px;
+    line-height: 15px;
+}

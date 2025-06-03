@@ -1,0 +1,13 @@
+.gcloudignore
+
+webClient/.env
+webClient/SecurityCertificate/
+webClient/dist/
+webClient/node_modules/
+
+expressServer/.env
+expressServer/node_modules/
+expressServer/env-secrets.json
+expressServer/build/
+expressServer/keys
+expressServer/.vscode/

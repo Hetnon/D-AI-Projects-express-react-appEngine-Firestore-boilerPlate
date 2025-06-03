@@ -1,0 +1,30 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+steps:
+  # Front-end steps
+  #Step 0: Install dependencies for the webClient
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['install']
+    dir: 'webClient'
+    id: 'Install webClient dependencies'
+
+  #Step 1: Build the webClient
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['run', 'build']
+    dir: 'webClient'
+    id: 'Build webClient'
+    waitFor: ['Install webClient dependencies']
+
+  #Step 2: Copy webClient files
+  - name: 'ubuntu'
+    args: ['cp', 'app.js', 'package.json', 'dist/']
+    dir: 'webClient'
+    id: 'Copy webClient files'
+    waitFor: ['Build webClient']
+
+  #Step 3: Deploy the webClient
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy', 'app.yaml']
+    dir: 'webClient'
+    id: 'Deploy webClient'
+    waitFor: ['Copy webClient files']

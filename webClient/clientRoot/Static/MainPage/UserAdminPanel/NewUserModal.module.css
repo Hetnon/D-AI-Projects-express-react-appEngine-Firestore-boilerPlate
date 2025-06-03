@@ -1,0 +1,48 @@
+.newUserPopup {
+    min-height: 130px;
+    min-width: 500px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: 16px;
+    transform: translate(-50%, -50%);
+    width: 256px;
+    height: 232px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-style: solid;
+    border-color: var(--border-medium);
+    border-width: 2px;
+    outline: none; /* Removes the default focus outline */
+    background-color: var(--background-light);
+}
+
+.newUserPopup:focus {
+    border-style: solid;
+    border-color: var(--border-light);
+    border-width: 2px;
+    outline: none; /* Removes the default focus outline */
+}
+
+.actionModalTitle{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--letter-dark);
+    line-height: 20px;
+    margin: 16px 0 16px 0;
+}
+
+.confirmationButtons{
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    flex-direction: row; 
+    margin-top: 16px;
+    margin-bottom: 32px;
+}

@@ -1,0 +1,17 @@
+
+.iconWrapper{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.iconWrapper:hover{
+    background-color: var(--background-hovered-button);
+}
+
+.icon{
+    color: var(--icons);
+    cursor: pointer;
+}

@@ -1,0 +1,39 @@
+.primary, .secondary, .selected{
+    border-radius: 16px;
+    font-size: 12px;
+    line-height: 12px;
+    font-family: var(--quotemaster-font-family);
+}
+
+.primary{
+    color: var(--letter-light);
+    background-color: var(--background-dark);
+}
+
+.primary:hover{
+    color: var(--letter-light);
+    background-color: var(--background-dark);
+}
+
+.secondary{
+    color: var(--letter-dark);
+    background-color: var(--background-regular);
+}
+
+.secondary:hover{
+    color: var(--letter-dark);
+    background-color: var(--background-hovered-button);
+
+}
+
+.selected{
+    color: var(--letter-selected-button);
+    background-color: var(--background-selected-button);
+    border: none;
+}
+
+.selected:hover{
+    color: var(--letter-selected-button);
+    background-color: var(--background-selected-button);
+    border: none;
+}

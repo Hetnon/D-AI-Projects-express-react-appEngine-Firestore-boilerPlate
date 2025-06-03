@@ -1,0 +1,61 @@
+.entryPage{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+.entryMessage{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.title{
+    font-weight: bold;
+    color: var(--letter-dark);
+    font-size: 48px;
+    margin-right: 0px;
+    margin-left: 0px;
+    margin-bottom: 40px;
+}
+
+
+.loginArea{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid var(--border-dark);
+    width: 300px;
+    height: 'auto';
+    padding: 16px;
+    margin-top: 24px;
+}
+
+.inputArea{
+    color: var(--letter-dark);
+    outline: none;
+    border: 2px solid var(--border-dark);
+    resize: none;
+    box-sizing: border-box;
+    display: block;
+    background-color: var(--background-light);
+    width: 232px;
+    line-height: 16px;
+    margin: 8px 0px;
+    font-size: 16px;
+    padding: 0px 8px;
+
+}
+
+.buttonsLoginSignupArea{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 8px 0px;
+}
