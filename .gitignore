@@ -11,3 +11,4 @@ expressServer/env-secrets.json
 expressServer/build/
 expressServer/keys
 expressServer/.vscode/
+expressServer/static/firebase/firebase-data/export/

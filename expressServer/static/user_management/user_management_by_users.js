@@ -8,10 +8,13 @@ const usersCollection = getUsersCollection();
 export async function userLogin(req, res){
     try{
         const {email, password} = req.body;
+        console.log('userLogin called with email:', email);
         if(!email || !password){
             res.status(400).json({error: 'MissingFields', message: 'Email and password are required'});
             return;
         }
+        const allUsers = await usersCollection.get();
+        console.log('All users:', allUsers.docs.map(doc => doc.id))
         const userDoc = await usersCollection.doc(email).get();
         if(!userDoc.exists){
             res.status(404).json({error: 'UserNotFound', message: 'User not found'});
@@ -33,16 +36,9 @@ export async function userLogin(req, res){
             firstName: userData.firstName,
             lastName: userData.lastName
         }
-        req.session.user = user;
 
-        // Save the session
-        req.session.save(err => {
-            if(err) {
-                console.error('Session save error:', err);
-                res.status(500).send('Session save error');
-                return;
-            }
-        });
+
+        await createSession(req, user)
         
         console.log('User logged in:', req.session.user.userEmail);
         res.status(200).json({message: 'Login successful', userType: userData.userType, firstName: userData.firstName, lastName: userData.lastName});
@@ -53,6 +49,49 @@ export async function userLogin(req, res){
     }
 }
 
+async function createSession(req, user) {
+    return new Promise((resolve, reject) => {
+        req.session.regenerate(err => {  // discard any pre-login stub
+            if (err) return reject(err);
+            req.session.user = user;
+            const origin = getOrigin(req);
+
+            if (process.env.NODE_ENV === 'production') {
+                req.session.cookie.domain =
+                    origin?.includes(process.env.ALLOWED_ORIGIN)
+                    ? process.env.MAIN_DOMAIN
+                    : process.env.SECONDARY_DOMAIN;
+            } else {
+                req.session.cookie.domain = 'localhost';
+            }
+
+            req.session.cookie.sameSite = origin === process.env.ALLOWED_ORIGIN ? 'Strict' : 'None';
+
+            req.session.save(err => {
+                if(err) return reject(err);    
+                return resolve();          // everything persisted
+            })
+        });
+    })
+}
+
+function getOrigin(req) {
+    // with this logic we can understand the origin of the request
+    // and then we can cancel the request if it is not from the allowed origin
+    if (req.url?.includes('/socket.io/')) { // Adjust this according to where you expect the origin to be in a socket request
+        return req.headers.origin;
+    }  else if (req.headers) {
+        if (req.headers['api-key-name-1']) {
+            console.log('this is a call made from whoever has the api-key-name-1');
+            return 'API_Key_1';
+        } else if (req.headers['api-key-name-2']) {
+            console.log('this is a call made from whoever has the api-key-name-2');
+            return 'API_Key_2';
+        }
+        return req.get('Origin');
+    } 
+    return null;
+}
 
 export async function passwordResetRequest(req, res){
     try{

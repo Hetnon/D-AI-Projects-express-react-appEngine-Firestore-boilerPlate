@@ -9,6 +9,7 @@ import path  from 'path';
 import firestoreStoreFactory from 'firestore-store';
 import {loadSecrets} from './secret_manager.js';
 import cookieParser from 'cookie-parser';
+import { ngrokConnection } from './externalConnections/ngrok/ngrokConnection.js'
 
 const app = express();
 app.use(cookieParser());  // This parses cookies and populates `req.cookies`
@@ -32,36 +33,6 @@ let io;
         const {initializeAllFirebase, getFirebaseDB} = await import('./firebase/firebase_apis.js');
         await initializeAllFirebase();
 
-        const db = getFirebaseDB();
-        const store = new FirestoreStore({
-            database: db,
-            kind: sessionName
-        });
-
-        const sessionConfig = createSessionConfig(store, sessionName);
-
-        app.use(session(sessionConfig)); // Initialize session middleware
-
-        app.use((req, res, next) =>{ // Create session middleware
-            const origin = getOrigin(req);
-            if(origin==='health_check' ) { // if it's a call from the WebAfiliado we don't create a session
-                return next();
-            }
-
-            if (process.env.NODE_ENV === 'production') {
-            req.session.cookie.domain =
-            origin?.includes(process.env.ALLOWED_ORIGIN)
-                ? process.env.MAIN_DOMAIN
-                : process.env.SECONDARY_DOMAIN;
-            } else {
-                req.session.cookie.domain = 'localhost';
-            }
-
-            req.session.cookie.sameSite =
-            origin === process.env.ALLOWED_ORIGIN ? 'Strict' : 'None';
-
-            next();
-        })
         app.get('/', (req, res) => {
             console.log('root working');// Check if your application is ready (e.g., database connections are established)      
             res.status(200).send('root working OK');  // If ready, respond with a 200 OK status
@@ -72,6 +43,17 @@ let io;
         app.get('/liveness_check', (req, res) => {
             res.status(200).send('liveness check ok');
         });
+
+        const db = getFirebaseDB();
+        const store = new FirestoreStore({
+            database: db,
+            kind: sessionName
+        });
+
+        const sessionConfig = createSessionConfig(store, sessionName);
+
+        app.use(session(sessionConfig)); // Initialize session middleware
+
 
         const {userLogin, passwordChange, passwordResetRequest, passwordResetConfirmation} = await import('./user_management/user_management_by_users.js');
         const {terminateSession} = await import('./user_session_init.js');
@@ -100,10 +82,6 @@ let io;
         // Start the server
         startServer();
 
-        if(process.env.NODE_ENV === 'development') { // this needs to come after initializing the firebase modules
-            const {ngrokConnection} = await import('./externalConnections/ngrok/ngrokConnection.js');
-            await ngrokConnection(process.env.PORT, process.env.RESERVED_NGROK_DOMAIN, process.env.NGROK_AUTH_TOKEN);
-        }
     } catch (error) {
         console.error("Error during server initialization:", error);
     }
@@ -122,6 +100,7 @@ async function startDevelopmentConfigurations(){
     console.log('Development environment');
     const dotenv = await import('dotenv');
     dotenv.config();
+    await ngrokConnection(process.env.PORT, process.env.RESERVED_NGROK_DOMAIN, process.env.NGROK_AUTH_TOKEN);
     sessionName = 'dev-session';	
     const key = fs.readFileSync(path.join(__dirname, '..', 'keys', 'security_certificate', 'localhost-key.pem'));
     const cert = fs.readFileSync(path.join(__dirname, '..','keys', 'security_certificate', 'localhost.pem'));
@@ -189,26 +168,3 @@ function createSessionConfig(store, sessionName){
     };
 }
 
-function getOrigin(req) {
-    if (req.url?.includes('/socket.io/')) {
-        // // Adjust this according to where you expect the origin to be in a socket request
-        return req.headers.origin;
-    }  else if (req.headers) {
-        if (req.headers['quote-master-api-key']) {
-            console.log('this is an WA_Call request');
-            return 'WA_Call';
-            // depending on the origin we cancel the API request
-        } else if (req.headers['x5-quoteMaster-api-key']) {
-            console.log('this is an X5_Call request');
-            return 'X5_Call';
-            // depending on the origin we cancel the API request
-        }
-        if (['/liveness_check', '/readiness_check'].includes(req.path)) {
-            return 'health_check';
-        }
-
-        return req.get('Origin');
-        // depending on the origin we cancel the socket connection setup
-    } 
-    return null;
-}

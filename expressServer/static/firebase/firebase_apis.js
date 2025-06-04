@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import {firebaseKey} from '../secret_manager.js';
-
+import {firestoreEmulatorUp} from './runFirestoreContainer.js';
 let _db;
 let _usersCollection;
 let _errorCollection;
@@ -35,14 +35,8 @@ export async function initializeAllFirebase(){
             ignoreUndefinedProperties: true
         });
 
-        _usersCollection = _db.collection('quoteMasterUsers');
-
-        if (process.env.NODE_ENV === 'production'){
-            _errorCollection = _db.collection('errorCollection')
-        } else if (process.env.NODE_ENV === 'development'){
-            _errorCollection = _db.collection('errorCollectionDev')
-        }
-
+        _usersCollection = _db.collection('users');
+        _errorCollection = _db.collection('errorCollection')
         console.log('Firestore initialized');
         return;
     } catch (error){
@@ -55,17 +49,37 @@ async function initializeFirebase() {
         let serviceAccount;
         if (process.env.NODE_ENV === 'production') {
             serviceAccount = await firebaseKey(); // Load secrets from Secret Manager in production
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
         } else {
             // Load service account from local file in development
-            const module = await import('../../keys/firebase-adminsdk.json');            
-            serviceAccount = module.default;
+            await firestoreEmulatorUp(); // Ensure Firestore emulator is running
+            // ② point every Admin-SDK call at the emulator
+            process.env.GOOGLE_CLOUD_PROJECT   ||= 'demo-project';
+            process.env.FIRESTORE_EMULATOR_HOST ||= 'localhost:8080';
+            admin.initializeApp({projectId: process.env.GOOGLE_CLOUD_PROJECT});
+
         }
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-        });
+
     }
 }
 
 
-       
+// async function initializeFirebase() {
+//     if (!admin.apps.length) {
+//         let serviceAccount;
+//         if (process.env.NODE_ENV === 'production') {
+//             serviceAccount = await firebaseKey(); // Load secrets from Secret Manager in production
+//         } else {
+
+//             const module = await import('../../keys/firebase-adminsdk.json');            
+//             serviceAccount = module.default;
+//         }
+//         admin.initializeApp({
+//             credential: admin.credential.cert(serviceAccount),
+//         });
+//     }
+// }
+
             

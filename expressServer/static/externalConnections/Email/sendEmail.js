@@ -9,7 +9,7 @@ export async function sendEmail(emailAddress, content, subject) {
 
         // Here you would implement the actual email sending logic
         // For example, using a service like nodemailer or an external API
-        console.log(`Sending email to: ${email}`);
+        console.log(`Sending email to: ${emailAddress}`);
         console.log(`Subject: ${subject}`);
         console.log(`Content: ${content}`);
 

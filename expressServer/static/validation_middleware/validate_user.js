@@ -32,7 +32,6 @@ export function validateUser(callingFunctionName) {
 }
 
 export function checkUserSession(req, res) {
-
     const user = req.session?.user;
 
     if (!user) {
@@ -48,6 +47,5 @@ export function checkUserSession(req, res) {
         lastName: user.lastName,
         profilePic: user.profilePic
     };
-    
     res.status(200).json({ responseUser });
 }

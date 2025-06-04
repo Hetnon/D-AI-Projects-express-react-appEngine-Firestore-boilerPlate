@@ -162,3 +162,9 @@ function User({user, setUserList, setUserToDelete}) {
         </div>
     )
 }
+
+User.propTypes = {
+    user: PropTypes.object.isRequired,
+    setUserList: PropTypes.func.isRequired,
+    setUserToDelete: PropTypes.func.isRequired
+};
