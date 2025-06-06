@@ -26,7 +26,7 @@ async function getGCloudToken(keys) {
             scopes: 'https://www.googleapis.com/auth/cloud-platform',
         });
         let client;
-        console.log('keys inside getGCloudToken', keys && keys.type);
+        console.log('keys inside getGCloudToken', keys?.type);
         if(keys){ // if keys are passed, use them to authenticate
             client = auth.fromJSON(keys);
         } else { // if keys are not passed means we are in the prod enviroment, already inside google app engine/google cloud project, use the default authentication

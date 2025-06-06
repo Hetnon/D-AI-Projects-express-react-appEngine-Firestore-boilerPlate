@@ -1,10 +1,10 @@
-import {getUsersCollection} from '../firebase/firebase_apis.js';
 import {encryptToken, decryptToken, createUniquePasswordResetToken} from '../utils/encryption/token_encryption.js';
 import { createPassword } from '../utils/newPassword.js';
 import { sendEmail } from '../externalConnections/Email/sendEmail.js';
 import { sendNewPassword } from './user_management_by_admins.js';
+import { getMethods } from '../database/databases.js';
+const {getUserDocument, updateUserFields} = getMethods();
 
-const usersCollection = getUsersCollection();
 export async function userLogin(req, res){
     try{
         const {email, password} = req.body;
@@ -13,35 +13,33 @@ export async function userLogin(req, res){
             res.status(400).json({error: 'MissingFields', message: 'Email and password are required'});
             return;
         }
-        const allUsers = await usersCollection.get();
-        console.log('All users:', allUsers.docs.map(doc => doc.id))
-        const userDoc = await usersCollection.doc(email).get();
-        if(!userDoc.exists){
+
+        const userDoc = await getUserDocument(email);
+        if(!userDoc){
             res.status(404).json({error: 'UserNotFound', message: 'User not found'});
             return;
         }
-        const userData = userDoc.data();
-        if(decryptToken(userData.password) !== password){
+        if(decryptToken(userDoc.password) !== password){
             res.status(401).json({error: 'IncorrectPassword', message: 'Incorrect password'});
             return;
         }
 
-        if(userData.status!== 'active'){
+        if(userDoc.status!== 'active'){
             res.status(403).json({error: 'UserStatus', message: 'User not active or pending approval - contact admin'});
             return;
         }
         const user = {
             userEmail: email,
-            userType: userData.userType,
-            firstName: userData.firstName,
-            lastName: userData.lastName
+            userType: userDoc.userType,
+            firstName: userDoc.firstName,
+            lastName: userDoc.lastName
         }
 
 
         await createSession(req, user)
         
         console.log('User logged in:', req.session.user.userEmail);
-        res.status(200).json({message: 'Login successful', userType: userData.userType, firstName: userData.firstName, lastName: userData.lastName});
+        res.status(200).json({message: 'Login successful', userType: userDoc.userType, firstName: userDoc.firstName, lastName: userDoc.lastName});
 
     } catch (error){
         console.error('Error on userLogin', error);
@@ -52,7 +50,10 @@ export async function userLogin(req, res){
 async function createSession(req, user) {
     return new Promise((resolve, reject) => {
         req.session.regenerate(err => {  // discard any pre-login stub
-            if (err) return reject(err);
+            if (err) {
+                console.error('Error regenerating session:', err);
+                return reject(new Error('Session regeneration failed'));
+            }
             req.session.user = user;
             const origin = getOrigin(req);
 
@@ -68,7 +69,7 @@ async function createSession(req, user) {
             req.session.cookie.sameSite = origin === process.env.ALLOWED_ORIGIN ? 'Strict' : 'None';
 
             req.session.save(err => {
-                if(err) return reject(err);    
+                if(err) return reject(new Error('Session save failed'));
                 return resolve();          // everything persisted
             })
         });
@@ -102,15 +103,15 @@ export async function passwordResetRequest(req, res){
             res.status(400).json({error: 'MissingFields', message: 'Email is required'});
             return;
         }
-        const userDoc = await usersCollection.doc(email).get();
-        if(!userDoc.exists){
+        const userDoc = await getUserDocument(email);
+        if(!userDoc){
             console.log(`user ${email} not found`)
             res.status(404).json({error: 'UserNotFound', message: 'User not found'});
             return;
         }
         const uniqueToken = createUniquePasswordResetToken();
         const encryptedToken = encryptToken(uniqueToken);
-        await usersCollection.doc(userDoc.id).update({passwordResetToken: encryptedToken});
+        await updateUserFields(email, {passwordResetToken: encryptedToken});
         await sendPasswordResetConfirmation(email, uniqueToken);
         res.status(200).json({message: 'Password reset email sent'});
     } catch (error){
@@ -125,7 +126,7 @@ async function sendPasswordResetConfirmation(emailAddress, token) {
         const subject = 'Quote Master - Confirmação de redefinição de senha';
         const content = `Olá do Quote Master!  
                         \n Alguém solicitou a redefinição da sua senha no nosso sistema.
-                        \nPara confirmar, apenas clique no link: ${`quotemaster.carglass.com.br/password-reset?token=${token}&userEmail=${emailAddress}`}
+                        \nPara confirmar, apenas clique no link: ${`${process.env.ALLOWED_ORIGIN}/password-reset?token=${token}&userEmail=${emailAddress}`}
                         \nApós clicar no link, uma página de confirmação irá se abrir. Você pode fechá-la após a confirmação.
                         \nSua senha será alterada e você receberá um email com a nova senha.
 
@@ -149,8 +150,8 @@ export async function passwordResetConfirmation(req, res){
             return;
         }
 
-        const userDoc = await usersCollection.doc(email).get();
-        if(!userDoc.exists){
+        const userDoc = await getUserDocument(email)
+        if(!userDoc){
             res.status(404).json({error: 'UserNotFound', message: 'User not found'});
             return;
         }
@@ -159,15 +160,13 @@ export async function passwordResetConfirmation(req, res){
             res.status(400).json({error: 'MissingFields', message: 'Token is required'});
             return;
         }
-
-        const userData = userDoc.data(); 
-
-        if(!userData.passwordResetToken){
+ 
+        if(!userDoc.passwordResetToken){
             res.status(401).json({error: 'InvalidToken', message: 'No password reset request found for this user'});
             return;
         }
         
-        const savedResetToken = decryptToken(userData.passwordResetToken);
+        const savedResetToken = decryptToken(userDoc.passwordResetToken);
         if(savedResetToken !== resetToken){
             res.status(401).json({error: 'InvalidToken', message: 'Token invalido'});
             return;
@@ -175,7 +174,7 @@ export async function passwordResetConfirmation(req, res){
         
         const newPassword = createPassword();
         const encryptedPassword = encryptToken(newPassword);
-        await usersCollection.doc(userDoc.id).update({passwordResetToken: '', password: encryptedPassword});
+        await updateUserFields(email, {passwordResetToken: '', password: encryptedPassword});
         await sendNewPassword(email, newPassword);
         res.status(200).json({message: 'Password reset email sent'});
     } catch (error){
@@ -197,20 +196,19 @@ export async function passwordChange(req, res){
             return;
         }
 
-        const userDoc = await usersCollection.doc(email).get();
-        if(!userDoc.exists){
+        const userDoc = await getUserDocument(email);
+        if(!userDoc){
             res.status(404).json({error: 'UserNotFound', message: 'User not found'});
             return;
         }
-        const userData = userDoc.data();
 
-        if(decryptToken(userData.password) !== currentPassword){
+        if(decryptToken(userDoc.password) !== currentPassword){
             res.status(401).json({error: 'IncorrectPassword', message: 'Incorrect current password'});
             return;
         }
 
         const encryptedPassword = encryptToken(newPassword);
-        await usersCollection.doc(userDoc.id).update({password: encryptedPassword});
+        await updateUserFields(email, {password: encryptedPassword});
         res.status(200).json({message: 'Password changed successfully'});
 
     } catch (error){

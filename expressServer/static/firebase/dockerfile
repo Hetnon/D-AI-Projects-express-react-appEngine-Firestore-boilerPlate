@@ -1,5 +1,0 @@
-FROM andreyka26/firebase-emulator
-#copy the wokspace to the container
-COPY . /workspace
-# set the working directory
-WORKDIR /workspace

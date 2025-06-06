@@ -11,4 +11,7 @@ expressServer/env-secrets.json
 expressServer/build/
 expressServer/keys
 expressServer/.vscode/
-expressServer/static/firebase/firebase-data/export/
+expressServer/static/firebase/setupAndRun/firebase-data/firestore_export/
+expressServer/static/firebase/setupAndRun/firebase_emulator_log.log
+expressServer/static/firebase/setupAndRun/firebase-debug.log
+expressServer/static/firebase/setupAndRun/firestore-debug.log

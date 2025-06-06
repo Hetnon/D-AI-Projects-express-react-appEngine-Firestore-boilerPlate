@@ -3,6 +3,8 @@ if(process.env.NODE_ENV !== 'production'){
     console.log('loaded allowed API keys');
 }
 
+// copy the line below to import the validateAPI function in server.js
+// const {validateAPI} = await import('./validation_middleware/validate_api_keys.js');
 
 export async function validateAPI(req, res, next) {
     const allowedHeaders = ['quote-master-api-key', 'x5-quotemaster-api-key', 'dev-env-api-key'];

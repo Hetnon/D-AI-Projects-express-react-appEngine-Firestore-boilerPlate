@@ -1,4 +1,4 @@
-import {getErrorCollection} from './firebase_apis.js'
+import {getErrorCollection} from '../firebase_apis.js'
 import moment from 'moment';
 
 export async function saveErrorsToDB(serviceOrderId, errors){

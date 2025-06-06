@@ -10,12 +10,11 @@ async function pollNgrokUrl(port = 3030) {
           return url;
         }
       } catch (err) {
-        // ignore, keep looping
+        console.error(`Attempt ${i + 1}: Error fetching ngrok URL for port ${port}:`, err);
       }
     }
     throw new Error(`Could not find an ngrok tunnel for port ${port} after ${maxAttempts} attempts`);
 }
-import { updateNgrokUrl } from './ngrok_url_management.js';
 
 async function getNgrokUrlForPort(port) {
     // Hits ngrok's admin API to get all tunnels, finds the one for our port

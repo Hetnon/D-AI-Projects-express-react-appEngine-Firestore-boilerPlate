@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import {firebaseKey} from '../secret_manager.js';
-import {firestoreEmulatorUp} from './runFirestoreContainer.js';
+import {firestoreEmulatorUp} from './setupAndRun/runFirebase.js';
 let _db;
 let _usersCollection;
 let _errorCollection;
@@ -63,23 +63,4 @@ async function initializeFirebase() {
         }
 
     }
-}
-
-
-// async function initializeFirebase() {
-//     if (!admin.apps.length) {
-//         let serviceAccount;
-//         if (process.env.NODE_ENV === 'production') {
-//             serviceAccount = await firebaseKey(); // Load secrets from Secret Manager in production
-//         } else {
-
-//             const module = await import('../../keys/firebase-adminsdk.json');            
-//             serviceAccount = module.default;
-//         }
-//         admin.initializeApp({
-//             credential: admin.credential.cert(serviceAccount),
-//         });
-//     }
-// }
-
-            
+}      

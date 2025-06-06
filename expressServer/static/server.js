@@ -10,6 +10,7 @@ import firestoreStoreFactory from 'firestore-store';
 import {loadSecrets} from './secret_manager.js';
 import cookieParser from 'cookie-parser';
 import { ngrokConnection } from './externalConnections/ngrok/ngrokConnection.js'
+import loadDatabaseMethods  from './database/databases.js'; // Load database methods dynamically
 
 const app = express();
 app.use(cookieParser());  // This parses cookies and populates `req.cookies`
@@ -30,9 +31,9 @@ let io;
         app.use(bodyParser.json());
 
         // 
-        const {initializeAllFirebase, getFirebaseDB} = await import('./firebase/firebase_apis.js');
+        const {initializeAllFirebase, getFirebaseDB} = await import('./firestore/firebase_apis.js');
         await initializeAllFirebase();
-
+        await loadDatabaseMethods();
         app.get('/', (req, res) => {
             console.log('root working');// Check if your application is ready (e.g., database connections are established)      
             res.status(200).send('root working OK');  // If ready, respond with a 200 OK status
@@ -58,7 +59,6 @@ let io;
         const {userLogin, passwordChange, passwordResetRequest, passwordResetConfirmation} = await import('./user_management/user_management_by_users.js');
         const {terminateSession} = await import('./user_session_init.js');
         const {createUser, getUsersList, deleteUser, changeUserStatus} = await import('./user_management/user_management_by_admins.js');
-        const {validateAPI} = await import('./validation_middleware/validate_api_keys.js');
         const {validateUser, checkUserSession} = await import('./validation_middleware/validate_user.js');
 
         // User Management Calls By Users

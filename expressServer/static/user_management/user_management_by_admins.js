@@ -1,17 +1,17 @@
-import {getUsersCollection} from '../firebase/firebase_apis.js';
-
 import {encryptToken} from '../utils/encryption/token_encryption.js';
 import {createPassword } from '../utils/newPassword.js';
 import {sendEmail} from '../externalConnections/Email/sendEmail.js';
-const usersCollection = getUsersCollection();
+
+import {getMethods } from '../database/databases.js';
+const {getUserDocument, createUserDB, getUsersListDB, deleteUserDB, updateUserFields} = getMethods();
 
 export async function createUser(req, res){
     try{
         const newUser = req.body;
 
         // check if user email is already in use
-        const userDoc = await usersCollection.doc(newUser.userEmail).get();
-        if(userDoc.exists){
+        const userDoc = await getUserDocument(newUser.userEmail);
+        if(userDoc){
             res.status(403).json({error: 'UserExists', message: 'User already exists'});
             return;
         }
@@ -19,11 +19,11 @@ export async function createUser(req, res){
         // create 16 random characters password
         const password = createPassword();  
 
-        // encrypt password and save user in usersCollection
+        // encrypt password and save user in user Doc
         newUser.password = encryptToken(password);
         newUser.status = 'active';
 
-        await usersCollection.doc(newUser.userEmail).set(newUser);
+        await createUserDB(newUser);
         await sendNewPassword(newUser.userEmail, password);
         res.status(200).json({message: 'User created'});
     } catch (error){
@@ -50,13 +50,11 @@ export async function sendNewPassword(emailAddress, password) {
 
 export async function getUsersList(req, res){
     try{
-        const usersDocs = await usersCollection.get();
+        const usersDocs = await getUsersListDB();
         // map to all fields
-        const users = usersDocs.docs.map(doc => {
-            const data = doc.data();
-            delete data.password;
-            data.userEmail = doc.id;
-            return data;
+        const users = usersDocs.map(doc => {
+            delete doc.password;
+            return doc;
         });
         res.status(200).send({users});
     } catch (error){
@@ -72,7 +70,7 @@ export async function deleteUser(req, res){
             res.status(400).send('User email is required');
             return;
         }
-        await usersCollection.doc(userEmail).delete();
+        await deleteUserDB(userEmail);
         res.status(200).send('User deleted');
     } catch (error){
         console.error('Error in deleteUser:', error);
@@ -89,8 +87,7 @@ export async function changeUserStatus(req, res){
             return;
         }
         const newStatus = req.body.newStatus;
-        const userRef = usersCollection.doc(userEmail);
-        await userRef.update({status: newStatus});
+        await updateUserFields(userEmail, {status: newStatus})
         res.status(200).send('User status updated');
     } catch (error){
         console.error('Error in changeUserStatus:', error);
