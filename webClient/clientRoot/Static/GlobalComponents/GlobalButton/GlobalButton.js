@@ -1,6 +1,6 @@
 
 import React from 'react'
-
+import PropTypes from 'prop-types';
 import Button from '@mui/material/Button'; 
 import styles from './GlobalButton.module.css';
 
@@ -18,17 +18,23 @@ export default function GlobalButton({onClick, label, width, type, height, upper
     };
 
     return(
-        <>
-            <Button 
-                onClick={onClick} 
-                className={styles[type]} 
-                style={buttonStyle} 
-            >
-                {label}
-            </Button>
-        </>
+        <Button 
+            onClick={onClick} 
+            className={styles[type]} 
+            style={buttonStyle} 
+        >
+            {label}
+        </Button>
     )
 }
 
 
 
+GlobalButton.propTypes = {
+    onClick: PropTypes.func.isRequired,
+    label: PropTypes.string.isRequired,
+    width: PropTypes.string,
+    type: PropTypes.oneOf(['primary', 'secondary', 'selected']).isRequired,
+    height: PropTypes.string,
+    uppercase: PropTypes.bool
+};
